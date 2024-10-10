@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SeoulStayMobileS5.TabbedPage1"
+            xmlns:android="clr-namespace:Xamarin.Forms.PlatformConfiguration.AndroidSpecific;assembly=Xamarin.Forms.Core"
+            android:TabbedPage.IsSwipePagingEnabled="True"
+            android:TabbedPage.ToolbarPlacement="Bottom"
+            Title="Seoul Stay - Services Menu">
+  <!--Pages can be added as references or inline-->
+    <ContentPage Title="Service"  >
+        <StackLayout>
+            <Label Text="Welcome John Doe"
+                   FontSize="Large"
+                   Margin="20,10,0,0"
+                   FontAttributes="Bold"
+                   x:Name="welcomMessage"/>
+
+            <Label Text="Please choose a category"
+                   FontSize="Large"
+                   Margin="20,0,0,0"
+                   FontAttributes="Bold"/>
+
+            <Button Text="City tours"
+                    FontSize="Large"
+                    ImageSource="checkmark.png"
+                    HorizontalOptions="FillAndExpand"
+                    x:Name="cityTourBtn"
+                    Clicked="cityTourBtn_Clicked"
+                    BackgroundColor="White"/>
+
+
+            <Button Text="Attraction tickets"
+                    FontSize="Large"
+                    ImageSource="home.png"
+                    HorizontalOptions="FillAndExpand"
+                    x:Name="attractionBtn"
+                    Clicked="attractionBtn_Clicked"
+                    BackgroundColor="White"/>
+
+
+
+            <Button Text="Transfer Services"
+                    FontSize="Large"
+                    ImageSource="airplane.png"
+                    HorizontalOptions="FillAndExpand"
+                    x:Name="transferBtn"
+                    Clicked="transferBtn_Clicked"
+                    BackgroundColor="White"/>
+            <Button Text="Catering Services"
+                    FontSize="Large"
+                    ImageSource="spoonknife.png"
+                    HorizontalOptions="FillAndExpand"
+                    x:Name="cateringBtn"
+                    Clicked="cateringBtn_Clicked"
+                    BackgroundColor="White"/>
+            <Button Text="Safety Box"
+                    FontSize="Large"
+                    ImageSource="eye.png"
+                    HorizontalOptions="FillAndExpand"
+                    x:Name="safetyBtn"
+                    Clicked="safetyBtn_Clicked"
+                    BackgroundColor="White"/>
+
+        </StackLayout>
+    </ContentPage>
+  <ContentPage Title="Tab 2" />
+  <ContentPage Title="Tab 3" />
+</TabbedPage>

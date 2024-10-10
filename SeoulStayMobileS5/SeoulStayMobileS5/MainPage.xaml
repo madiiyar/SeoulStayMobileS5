@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SeoulStayMobileS5.MainPage">
+
+    <StackLayout>
+        <Label Text="Enter username and password"
+               FontSize="18"
+               FontAttributes="Bold"
+               Margin="80,100,0,0"/>
+        
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width='*' />
+                <ColumnDefinition Width='*' />
+                <ColumnDefinition Width='*' />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Label Text="Username:"
+                   FontSize="Medium"
+                   Grid.Row="0"
+                   Grid.Column="0"
+                   Margin="10"/>
+            <Entry x:Name="usernameField"
+                   Placeholder="Enter your username"
+                   Grid.Column="1"
+                   Grid.Row="0" 
+                   WidthRequest="200"
+                   Margin="0,0,-60,10"/>
+            <Label Text="Password"
+                   Margin="10"
+                   FontSize="18" 
+                   Grid.Column="0"
+                   Grid.Row="1"/>
+            <Entry x:Name="passwordField"
+                   IsPassword="True"
+                   Placeholder="Enter your password"
+                   Grid.Column="1"
+                   Grid.Row="1" 
+                   WidthRequest="200"
+                   Margin="0,0,-60,10"/>
+
+            <Button Text="Login"
+                    Grid.Row="2"
+                    Grid.Column="2" 
+                    BackgroundColor="Green"
+                    TextColor="White"
+                    Margin="-20,10,50,10"
+                    Clicked="loginBtn_Clicked"
+                    x:Name="loginBtn"/>
+
+
+
+
+        </Grid>
+    </StackLayout>
+
+</ContentPage>
