@@ -35,10 +35,9 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-
             </StackLayout>
-
-
+            
+            
             <StackLayout Margin="10">
                 <Label Text="Description of"
                        FontSize="Medium"
@@ -65,14 +64,16 @@
                 <StackLayout Orientation="Horizontal">
                     <Label Text="Number of people"
                            FontSize="Medium"/>
-                    <Entry Keyboard="Numeric"
+                    <Entry Text="1"
+                           Keyboard="Numeric"
                            x:Name="numOfPeople"
                            FontSize="Medium"
                            Margin="0,-10"
                            WidthRequest="40"
                            TextChanged="numOfPeople_TextChanged"/>
                     <Label Text="in 5 bookings"
-                           FontSize="Medium"/>
+                           FontSize="Medium"
+                           x:Name="bookingsLabel"/>
                 </StackLayout>
 
                 <StackLayout Orientation="Horizontal">

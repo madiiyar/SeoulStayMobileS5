@@ -6,19 +6,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using static SeoulStayMobileS5.cityServicePage;
 
 namespace SeoulStayMobileS5
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class cityServicePage : ContentPage
 	{
+        private Service selectedService;
 		public cityServicePage ()
 		{
 			InitializeComponent ();
-
             LoadServices();
 		}
 
@@ -43,8 +43,6 @@ namespace SeoulStayMobileS5
             }
         }
 
-
-
         public class Service
         {
             public int id { get; set; }
@@ -53,7 +51,6 @@ namespace SeoulStayMobileS5
             public string name { get; set; }
             public decimal price { get; set; }
             public int duration { get; set; }
-
             public string description { get; set; }
             public string dayOfWeek { get; set; }
             public string dayOfMonth { get; set; }
@@ -66,84 +63,100 @@ namespace SeoulStayMobileS5
             if (e.SelectedItem == null)
                 return;
 
-            var selectedItem = (Service)e.SelectedItem;
+             selectedService = (Service)e.SelectedItem;
 
-            titleOfService.Text = $"Description of {selectedItem.name}";
-            descriptionOfService.Text = selectedItem.description;
+            titleOfService.Text = $"Description of {selectedService.name}";
+            descriptionOfService.Text = selectedService.description;
+            int numberOfPeople = int.Parse(numOfPeople.Text);
+            int numberOfBooking = (int)Math.Ceiling((double)numberOfPeople / selectedService.bookingCap);
+            totalAmountPay.Text = $"Amount payable: {numberOfBooking * selectedService.price:C}";
+            bookingsLabel.Text = $"{numberOfBooking} bookings required";
         }
 
-        private void date_DateSelected(object sender, DateChangedEventArgs e)
-        {
-            var selectedDate = e.NewDate;
-
-            if(isValidDate(selectedDate, selectedService))
-            {
-                spotsLabel.Text = $"Remaining: {CalculateRemainingSpots(selectedDate, selectedService)}";
-            }
-            else
-            {
-                DisplayAlert("Invalid Date", "The selected date is not available for booking.", "OK");
-            }
-        }
-
-       /* private bool isValidDate(DateTime selectedDate, Service selectedService)
-        {
-            bool validDayOfWeek = true;
-            if (!string.IsNullOrEmpty(selectedService.dayOfWeek) && selectedService.dayOfWeek != "*")
-            {
-                var allowedDaysOfWeek = selectedService.dayOfWeek.Split('-').Select(int.Parse).ToArray();
-                int selectedDayOfWeek = (int)selectedDate.DayOfWeek;
-
-                validDayOfWeek = selectedDayOfWeek >= allowedDaysOfWeek[0] && selectedDayOfWeek <= allowedDaysOfWeek[1];
-
-            }
-
-            bool validDayOfMonth = true;
-            if(!string.IsNullOrEmpty(selectedService.dayOfMonth) && selectedService.dayOfMonth != "*")
-            {
-                var allowedDaysOfMonth = selectedService.dayOfMonth.Split(',')
-                    .SelectMany(day => ExpandRange(day)).ToList();
-
-                int selectedDaysOfMonth = selectedDate.Day;
-
-                validDayOfMonth = allowedDaysOfMonth.Contains(selectedDaysOfMonth);
-            }
-
-            return validDayOfWeek && validDayOfMonth;
-        }
-
-        private IEnumerable<int> ExpandRange(string range)
-        {
-            if (range.Contains('-'))
-            {
-                var parts = range.Split('-').Select(int.Parse).ToArray();
-                return Enumerable.Range(parts[0], parts[1] - parts[0] + 1);
-            }
-            return new List<int> { int.Parse(range) };
-        }
-
-        private int CalculateRemainingSpots(DateTime selectedDate, Service service)
-        {
-            // Fetch how many bookings are already made for this date (from your backend or cache)
-            int bookingsMade = GetBookingsForDate(selectedDate);
-
-            // Remaining spots = Daily cap - Bookings made
-            return service.dailyCap - bookingsMade;
-        }
-*/
-
-        private void addBtn_Clicked(object sender, EventArgs e)
-        {
-
-        }
 
         private void numOfPeople_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (selectedService == null)
+                return;
+
+            if (int.TryParse(numOfPeople.Text, out int numberOfPeople))
+            {
+                if (numberOfPeople < 1)
+                {
+                    DisplayAlert("Error", "The number of people must be at least 1.", "OK");
+                    return;
+                }
+
+                // Calculate the number of bookings required
+                int numberOfBooking = (int)Math.Ceiling((double)numberOfPeople / selectedService.bookingCap);
+
+                // Update the amount payable and number of bookings required
+                totalAmountPay.Text = $"Amount payable: {numberOfBooking * selectedService.price:C}";
+                bookingsLabel.Text = $"{numberOfBooking} bookings required";
+            }
+            else
+            {
+                DisplayAlert("Error", "Please enter a valid number of people.", "OK");
+            }
+        }
+
+        private List<CartItem> cartItems = new List<CartItem>();
+
+        private async void addBtn_Clicked(object sender, EventArgs e)
+        {
+            if (selectedService == null)
+                return;
+
+            if (!int.TryParse(numOfPeople.Text, out int numberOfPeople) || numberOfPeople < 1)
+            {
+                DisplayAlert("Error", "Please enter a valid number of people.", "OK");
+                return;
+            }
+
+            var selectedDate = date.Date;
+            if (selectedDate == null)
+            {
+                DisplayAlert("Error", "Please choose date of service", "OK");
+                return;
+            }
+
+            var cartItem = new CartItem
+            {
+                ServiceName = selectedService.name,
+                Date = date.Date,
+                ServicePrice = selectedService.price,
+                NumberOfPeople = numberOfPeople,
+                AdditionalNotes = addNotes.Text,
+                TotalAmount = numberOfPeople * selectedService.price
+            };
+
+            if (this.Parent is TabbedPage1 parentTabbedPage)
+            {
+                parentTabbedPage.AddToCart(cartItem);
+            }
+
+            DisplayAlert("Success", "Service added to Cart successfully", "OK");
+
+            await Navigation.PopAsync();
 
         }
+
+        //I need to change date
+        private void date_DateSelected(object sender, DateChangedEventArgs e)
+        {
+            
+        }
+        
+
     }
 
-
-
-	
+    public class CartItem
+    {
+        public string ServiceName { get; set; }
+        public DateTime Date { get; set; }
+        public int NumberOfPeople { get; set; }
+        public decimal ServicePrice { get; set; }
+        public string AdditionalNotes { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
 }

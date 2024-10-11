@@ -63,6 +63,63 @@
 
         </StackLayout>
     </ContentPage>
-  <ContentPage Title="Tab 2" />
+    
+    
+    
+    <ContentPage Title="Cart (0)" >
+        <StackLayout>
+
+            <StackLayout HeightRequest="400">
+                <ListView x:Name="cartListView" HasUnevenRows="True">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <StackLayout Orientation="Horizontal">
+                                    <Image Source="home.png"
+                                           WidthRequest="30"
+                                           HeightRequest="30"/>
+                                    <StackLayout Padding="19,0,0,0">
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label  Text="{Binding ServiceName}"
+                                                    FontAttributes="Bold"
+                                                    FontSize="Medium"/>
+                                            <Label Text="{Binding TotalAmount, StringFormat='${0:F2}'}"/>
+                                        </StackLayout>
+                                        
+                                        <Label  Text="{Binding Date, StringFormat='From: {0:MM/dd/yyyy}' }"
+                                                FontSize="Small"/>
+                                        
+                                        <Label Text="{Binding NumberOfPeople, StringFormat='Number of people: {0}'}"
+                                               FontSize="Small"/>
+                                    </StackLayout>
+                                    <Button Text="🗑️" CommandParameter="{Binding .}"
+                                            x:Name="deleteBtn"
+                                            Clicked="deleteBtn_Clicked"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="EndAndExpand"/>
+                                </StackLayout>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackLayout>
+            
+
+           <!--<StackLayout Orientation="Horizontal">
+                <Label />
+                <Entry x:Name="couponField" />
+                <Button x:Name="submitBtn" />
+            </StackLayout>
+
+            <Label />
+
+
+            <Label x:Name="totalAmountToPay" />
+
+            <Button x:Name="proceedBtn" /> -->
+
+
+        </StackLayout> 
+    </ContentPage>
   <ContentPage Title="Tab 3" />
 </TabbedPage>
