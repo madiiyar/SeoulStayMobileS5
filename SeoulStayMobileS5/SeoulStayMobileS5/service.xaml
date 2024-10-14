@@ -6,7 +6,7 @@
             android:TabbedPage.IsSwipePagingEnabled="True"
             android:TabbedPage.ToolbarPlacement="Bottom"
             Title="Seoul Stay - Services Menu">
-  <!--Pages can be added as references or inline-->
+
     <ContentPage Title="Service"  >
         <StackLayout>
             <Label Text="Welcome John Doe"
@@ -121,5 +121,22 @@
 
         </StackLayout> 
     </ContentPage>
-  <ContentPage Title="Tab 3" />
+    <ContentPage Title="About" >
+        <StackLayout>
+            <Image Source="logoMain.png"
+                   HeightRequest="300"
+                   WidthRequest="300"
+                   HorizontalOptions="Center"/>
+            <Label Text="Seoul Stay Addon Services"
+                   FontSize="Medium" 
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   TextColor="Black"/>
+            <Label Text="V. 1.0"
+                   FontSize="Medium"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   TextColor="Black"/>
+        </StackLayout>
+    </ContentPage>
 </TabbedPage>

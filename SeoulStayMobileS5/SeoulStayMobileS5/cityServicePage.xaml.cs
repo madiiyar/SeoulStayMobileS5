@@ -87,10 +87,8 @@ namespace SeoulStayMobileS5
                     return;
                 }
 
-                // Calculate the number of bookings required
                 int numberOfBooking = (int)Math.Ceiling((double)numberOfPeople / selectedService.bookingCap);
 
-                // Update the amount payable and number of bookings required
                 totalAmountPay.Text = $"Amount payable: {numberOfBooking * selectedService.price:C}";
                 bookingsLabel.Text = $"{numberOfBooking} bookings required";
             }
@@ -100,63 +98,85 @@ namespace SeoulStayMobileS5
             }
         }
 
-        private List<CartItem> cartItems = new List<CartItem>();
 
         private async void addBtn_Clicked(object sender, EventArgs e)
         {
             if (selectedService == null)
+            {
+                await DisplayAlert("Error", "Please select a service before adding to the cart.", "OK");
                 return;
+            }
 
             if (!int.TryParse(numOfPeople.Text, out int numberOfPeople) || numberOfPeople < 1)
             {
-                DisplayAlert("Error", "Please enter a valid number of people.", "OK");
+                await DisplayAlert("Error", "Please enter a valid number of people.", "OK");
                 return;
             }
 
             var selectedDate = date.Date;
-            if (selectedDate == null)
-            {
-                DisplayAlert("Error", "Please choose date of service", "OK");
-                return;
-            }
 
-            var cartItem = new CartItem
+            // Create the UserPurchase object with valid data
+            var purchaseWrapper = new
             {
-                ServiceName = selectedService.name,
-                Date = date.Date,
-                ServicePrice = selectedService.price,
-                NumberOfPeople = numberOfPeople,
-                AdditionalNotes = addNotes.Text,
-                TotalAmount = numberOfPeople * selectedService.price
+                userPurchase = new UserPurchase
+                {
+                    UserId = 1,  // Assuming UserId is 1, replace with actual user ID in a real app
+                    Service = selectedService.name, // Ensure this is not null
+                    TotalPrice = selectedService.price * numberOfPeople, // Calculate total price
+                    Date = selectedDate, // Date should be passed in a valid format
+                    UserNotes = addNotes.Text, // Notes from the user input
+                    NumberOfPeople = numberOfPeople, // Number of people from user input
+                    Refunded = "NO"  // Defaulting the refunded status to "NO"
+                }
             };
 
-            if (this.Parent is TabbedPage1 parentTabbedPage)
+            // Convert the object to JSON
+            var json = JsonConvert.SerializeObject(purchaseWrapper);
+
+            using (HttpClient client = new HttpClient())
             {
-                parentTabbedPage.AddToCart(cartItem);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // For debugging, show the serialized JSON in an alert to check if the data is correct
+                await DisplayAlert("Debug", json, "OK");
+
+                try
+                {
+                    var response = await client.PostAsync("http://10.0.2.2:8044/api/userpurchases", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await DisplayAlert("Success", "Service added to cart successfully.", "OK");
+
+                        // Go back to the previous page after success
+                        await Navigation.PopAsync();
+                    }
+                    else
+                    {
+                        // If there's an error, show the server's response
+                        var errorResponse = await response.Content.ReadAsStringAsync();
+                        await DisplayAlert("Error", $"There was some problem. Server response: {errorResponse}", "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle any exceptions (e.g., network issues)
+                    await DisplayAlert("Error", $"There was an error connecting to the server: {ex.Message}", "OK");
+                }
             }
-
-            DisplayAlert("Success", "Service added to Cart successfully", "OK");
-
-            await Navigation.PopAsync();
-
         }
 
-        //I need to change date
-        private void date_DateSelected(object sender, DateChangedEventArgs e)
-        {
-            
-        }
-        
 
     }
 
-    public class CartItem
+    public class UserPurchase
     {
-        public string ServiceName { get; set; }
+        public long UserId { get; set; }
+        public string Service { get; set; }
+        public decimal TotalPrice { get; set; }
         public DateTime Date { get; set; }
-        public int NumberOfPeople { get; set; }
-        public decimal ServicePrice { get; set; }
-        public string AdditionalNotes { get; set; }
-        public decimal TotalAmount { get; set; }
+        public string UserNotes { get; set; }
+        public long NumberOfPeople { get; set; }
+        public string Refunded { get; set; }
     }
 }

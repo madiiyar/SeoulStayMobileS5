@@ -12,31 +12,10 @@ namespace SeoulStayMobileS5
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class TabbedPage1 : TabbedPage
     {
-        private List<CartItem> cartItems = new List<CartItem>();
+        private List<UserPurchase> cartItems = new List<UserPurchase>();
         public TabbedPage1()
         {
             InitializeComponent();
-            UpdateCartListView();
-            UpdateCartTabTitle();
-        }
-
-        public void AddToCart(CartItem item)
-        {
-            cartItems.Add(item);
-            UpdateCartListView();
-            UpdateCartTabTitle();
-        }
-
-        private void UpdateCartTabTitle()
-        {
-            int itemCount = cartItems.Count;
-            this.Children[1].Title = $"Cart ({itemCount})";
-        }
-
-        private void UpdateCartListView()
-        {
-            cartListView.ItemsSource = null;
-            cartListView.ItemsSource = cartItems;
         }
 
         private async void cityTourBtn_Clicked(object sender, EventArgs e)
