@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace SeoulStayMobileS5
@@ -24,11 +25,15 @@ namespace SeoulStayMobileS5
             string username = usernameField.Text;
             string password = passwordField.Text;
 
-            var isAuthentication = await AuthenticateUser(username, password);
+            var user = await AuthenticateUser(username, password);
 
-            if (isAuthentication)
+            if (user != null)
             {
+                await SecureStorage.SetAsync("userId", user.Id.ToString());
+                await SecureStorage.SetAsync("userFullname", user.FullName.ToString());
+
                 await Navigation.PushAsync(new TabbedPage1());
+
             } else
             {
                 await DisplayAlert("Error", "User or Password is incorrect", "OK");
@@ -36,7 +41,7 @@ namespace SeoulStayMobileS5
 
         }
 
-        private async Task<bool> AuthenticateUser(string username,string password)
+        private async Task<User> AuthenticateUser(string username,string password)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -45,7 +50,7 @@ namespace SeoulStayMobileS5
                 var users = JsonConvert.DeserializeObject<List<User>>(response);
 
                 var user = users.FirstOrDefault(u => u.Username == username && u.Password == password);
-                return user != null;
+                return user;
             }
         }
 

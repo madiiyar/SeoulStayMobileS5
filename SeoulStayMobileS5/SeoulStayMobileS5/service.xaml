@@ -66,7 +66,7 @@
     
     
     
-    <ContentPage Title="Cart (0)" >
+    <ContentPage Title="Cart (0)" x:Name="cartName">
         <StackLayout>
 
             <StackLayout HeightRequest="400">
@@ -80,10 +80,10 @@
                                            HeightRequest="30"/>
                                     <StackLayout Padding="19,0,0,0">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label  Text="{Binding ServiceName}"
+                                            <Label  Text="{Binding Service}"
                                                     FontAttributes="Bold"
                                                     FontSize="Medium"/>
-                                            <Label Text="{Binding TotalAmount, StringFormat='${0:F2}'}"/>
+                                            <Label Text="{Binding TotalPrice, StringFormat='${0:F2}'}"/>
                                         </StackLayout>
                                         
                                         <Label  Text="{Binding Date, StringFormat='From: {0:MM/dd/yyyy}' }"
@@ -105,22 +105,44 @@
             </StackLayout>
             
 
-           <!--<StackLayout Orientation="Horizontal">
-                <Label />
-                <Entry x:Name="couponField" />
-                <Button x:Name="submitBtn" />
+           <StackLayout Orientation="Horizontal" Margin="10">
+                <Label Text="Enter a coupon code: "
+                       FontSize="16"
+                       Margin="0,15,0,0"/>
+                <Entry x:Name="couponField"
+                       FontSize="16"
+                       WidthRequest="100"/>
+                <Button x:Name="submitBtn"
+                        Text="Submit"
+                        TextColor="White"
+                        BackgroundColor="Green"
+                        HeightRequest="20"
+                        Clicked="submitBtn_Clicked"/>
             </StackLayout>
 
-            <Label />
+            <Label Text=""
+                   x:Name="successCoupon"
+                   Margin="30,0,0,0"
+                   FontSize="16"/>
 
 
-            <Label x:Name="totalAmountToPay" />
+            <Label x:Name="totalAmountToPay"
+                   Text="Total amount payable (0 items): $0"
+                   FontSize="16"
+                   Margin="10,15,0,0"
+                   FontAttributes="Bold"/>
 
-            <Button x:Name="proceedBtn" /> -->
+            <Button x:Name="proceedBtn"
+                    Text="Proceed to checkout"
+                    Margin="150,0,10,0"
+                    Clicked="proceedBtn_Clicked"/> 
 
 
         </StackLayout> 
     </ContentPage>
+    
+    
+    
     <ContentPage Title="About" >
         <StackLayout>
             <Image Source="logoMain.png"
