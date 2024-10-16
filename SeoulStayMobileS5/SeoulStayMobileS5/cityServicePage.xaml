@@ -68,7 +68,8 @@
                            x:Name="numOfPeople"
                            FontSize="Medium"
                            Margin="0,-10"
-                           WidthRequest="40" />
+                           WidthRequest="40"
+                           TextChanged="numOfPeople_TextChanged"s/>
                     <Label Text="in 5 bookings"
                            FontSize="Medium"
                            x:Name="bookingsLabel"/>

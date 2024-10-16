@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace SeoulStayMobileS5
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class cityServicePage : ContentPage
-    {
+	[XamlCompilation(XamlCompilationOptions.Compile)]
+	public partial class attractionService : ContentPage
+	{
         private Service selectedService;
 
-        public cityServicePage()
+        public attractionService()
         {
             InitializeComponent();
             LoadServices();
@@ -31,8 +32,8 @@ namespace SeoulStayMobileS5
                     var response = await client.GetStringAsync(url);
                     var services = JsonConvert.DeserializeObject<List<Service>>(response);
 
-                    var cityTours = services.Where(a => a.serviceTypeid == 1).ToList();
-                    cityService.ItemsSource = cityTours;
+                    var cityTours = services.Where(a => a.serviceTypeid == 2).ToList();
+                    attractionServices.ItemsSource = cityTours;
                 }
                 catch (HttpRequestException ex)
                 {
@@ -74,13 +75,13 @@ namespace SeoulStayMobileS5
 
             var purchase = new UserPurchase
             {
-                UserId = long.Parse(userId),  
-                Service = selectedService.name,  
-                TotalPrice = selectedService.price * numberOfPeople,  
+                UserId = long.Parse(userId),
+                Service = selectedService.name,
+                TotalPrice = selectedService.price * numberOfPeople,
                 Date = DateTime.Parse(selectedDate),
-                UserNotes = addNotes.Text,  
-                NumberOfPeople = numberOfPeople,  
-                Refunded = "NO" 
+                UserNotes = addNotes.Text,
+                NumberOfPeople = numberOfPeople,
+                Refunded = "NO"
             };
 
             var json = JsonConvert.SerializeObject(purchase);
@@ -142,6 +143,8 @@ namespace SeoulStayMobileS5
             public int dailyCap { get; set; }
             public int bookingCap { get; set; }
         }
+
+
 
         private void numOfPeople_TextChanged(object sender, TextChangedEventArgs e)
         {

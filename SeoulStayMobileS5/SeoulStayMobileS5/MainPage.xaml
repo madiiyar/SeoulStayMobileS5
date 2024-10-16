@@ -45,7 +45,7 @@
                    WidthRequest="200"
                    Margin="0,0,-60,10"/>
 
-            <Button Text="Login"
+            <Button Text="Login"    
                     Grid.Row="2"
                     Grid.Column="2" 
                     BackgroundColor="Green"

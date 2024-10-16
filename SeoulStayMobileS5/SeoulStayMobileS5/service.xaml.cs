@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
@@ -19,16 +20,102 @@ namespace SeoulStayMobileS5
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class TabbedPage1 : TabbedPage
     {
-
-        private List<UserPurchase> cartItems = new List<UserPurchase>();
-        private decimal totalAmount;
+        private decimal totalAmount; // Keeps track of the total before discount
+        private decimal discountedTotal; // Keeps track of the total after applying the discount
+        private ObservableCollection<UserPurchase> cartItems = new ObservableCollection<UserPurchase>();
 
         public TabbedPage1()
         {
             InitializeComponent();
             LoadSomeData();
-            LoadCartItems();
+            //LoadCartItems();
+            LoadServiceTypes();
+            this.CurrentPageChanged += OnCurrentPageChanged;
+            
+        }
 
+        protected  override  void OnAppearing()
+        {
+            base.OnAppearing();
+              LoadCartItems();
+            UpdateTotalAmount();
+        }
+
+        private void OnCurrentPageChanged(object sender, EventArgs e)
+        {
+            // Set the TabbedPage title to the title of the current page
+            if (CurrentPage == cartName)
+            {
+                this.Title = "Seoul Stay - Cart Checkout";
+
+            } else if (CurrentPage == servicesTab)
+            {
+                this.Title = "Seoul Stay - Services Menu";
+            } else
+            {
+                this.Title = "Seoul Stay - About Us";
+            }
+        }
+
+
+
+        private async void LoadServiceTypes()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var url = "http://10.0.2.2:8044/api/servicetypes";
+                try
+                {
+                    var response = await client.GetStringAsync(url);
+                    var serviceTypes = JsonConvert.DeserializeObject<ObservableCollection<ServiceType>>(response);
+
+                    // Bind the ListView to the service types
+                    serviceTypesList.ItemsSource = serviceTypes;
+                }
+                catch (HttpRequestException ex)
+                {
+                    await DisplayAlert("Error", $"Unable to load service types: {ex.Message}", "OK");
+                }
+            }
+        }
+
+        private async void ServiceType_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null)
+                return;
+
+            var selectedServiceType = (ServiceType)e.SelectedItem;
+            await DisplayAlert("Selected Service", $"You selected: {selectedServiceType.Name}", "OK");
+
+            if (selectedServiceType.Name == "City tours")
+            {
+                await Navigation.PushAsync(new cityServicePage());
+            }
+            else if (selectedServiceType.Name == "Attraction tickets")
+            {
+                await Navigation.PushAsync(new attractionService());
+            }
+            else if (selectedServiceType.Name == "Airport Transfer")
+            {
+                await Navigation.PushAsync(new airportService());
+            }
+            else if (selectedServiceType.Name == "Catering services")
+            {
+                await Navigation.PushAsync(new cateringService());
+            }
+            else if (selectedServiceType.Name == "Safety box")
+            {
+                await Navigation.PushAsync(new safetyBox());
+            }
+        }
+
+        public class ServiceType
+        {
+            public int Id { get; set; }
+            public string Guid { get; set; }
+            public string Name { get; set; }
+            public string IconName { get; set; }
+            public string Description { get; set; }
         }
 
         private async void LoadSomeData()
@@ -57,15 +144,16 @@ namespace SeoulStayMobileS5
                     return;
                 }
 
-                string apiUrl = "http://10.0.2.2:8044/api/userpurchases?userId={userId}";
+                var url = $"http://10.0.2.2:8044/api/userpurchases?userId={userId}";
 
                 using (HttpClient client = new HttpClient())
                 {
-                    var response = await client.GetStringAsync(apiUrl);
-                    cartItems = JsonConvert.DeserializeObject<List<UserPurchase>>(response);
+                    var response = await client.GetStringAsync(url);
+                    cartItems = JsonConvert.DeserializeObject<ObservableCollection<UserPurchase>>(response);
 
                     cartListView.ItemsSource = cartItems;
 
+                    UpdateTotalAmount();
                     cartName.Title = $"Cart ({cartItems.Count})";
                 }
             }
@@ -78,34 +166,10 @@ namespace SeoulStayMobileS5
 
         private void UpdateTotalAmount()
         {
-            decimal total = cartItems.Sum(item => item.TotalPrice);
-            totalAmountToPay.Text = $"${total:F2}";
-
-        }
-
-        private async void cityTourBtn_Clicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new cityServicePage());
-        }
-
-        private async void attractionBtn_Clicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new cityServicePage());
-        }
-
-        private async void transferBtn_Clicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new cityServicePage());
-        }
-
-        private async void cateringBtn_Clicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new cityServicePage());
-        }
-
-        private async void safetyBtn_Clicked(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new cityServicePage());
+            // Calculate total amount based on the cart items
+            totalAmount = cartItems.Sum(item => item.TotalPrice);
+            discountedTotal = totalAmount; // Initially, discounted total is the same as the totalAmount
+            totalAmountToPay.Text = $"Total amount payable ({cartItems.Count} items): ${totalAmount:F2}";
         }
 
         private async void submitBtn_Clicked(object sender, EventArgs e)
@@ -120,13 +184,48 @@ namespace SeoulStayMobileS5
 
             var couponValid = await couponIsRight(couponCode);
 
-            if(couponValid != null)
+            if (couponValid != null)
             {
-                await DisplayAlert("Success", "You wrote correct coupon code", "Ok");
-            } else
-            {
-                await DisplayAlert("Error", "You wrote incorrect coupon code", "Ok");
+                await DisplayAlert("Success", "You wrote a correct coupon code", "Ok");
+                ApplyDiscount(couponValid); // Apply discount after checking coupon validity
             }
+            else
+            {
+                await DisplayAlert("Error", "You wrote an incorrect coupon code", "Ok");
+            }
+        }
+
+        public class Coupons
+        {
+            public int Id { get; set; }
+            public string CouponCode { get; set; }
+            public decimal DiscountPercent { get; set; }
+            public decimal MaximimDiscountAmount { get; set; }
+        }
+
+        private void ApplyDiscount(Coupons coupon)
+        {
+            // Calculate the discount based on the coupon percent
+            decimal discount = (coupon.DiscountPercent / 100) * totalAmount;
+
+            // Ensure the discount does not exceed the maximum allowed by the coupon
+            if (discount > coupon.MaximimDiscountAmount)
+            {
+                discount = coupon.MaximimDiscountAmount;
+            }
+
+            // Update discounted total after applying the discount
+            discountedTotal = totalAmount - discount;
+
+            // Update the total amount displayed on the UI
+            totalAmountToPay.Text = $"Total amount payable ({cartItems.Count} items): ${discountedTotal:F2}";
+
+            // Inform the user how much they saved
+            DisplayAlert("Coupon Applied", $"You saved ${discount:F2}!", "Ok");
+
+            // Disable the submit button to prevent re-applying the coupon
+            successCoupon.Text = "Coupon Successfully Applied";
+            submitBtn.IsEnabled = false;
         }
 
         private async Task<Coupons> couponIsRight(string couponCode)
@@ -137,10 +236,14 @@ namespace SeoulStayMobileS5
                 var response = await client.GetStringAsync(apiUrl);
                 var coupons = JsonConvert.DeserializeObject<List<Coupons>>(response);
 
+                // Find the matching coupon by its code
                 var coupon = coupons.FirstOrDefault(u => u.CouponCode == couponCode);
                 return coupon;
             }
         }
+
+
+
 
         private async void deleteBtn_Clicked(object sender, EventArgs e)
         {
@@ -169,6 +272,7 @@ namespace SeoulStayMobileS5
                 cartItems.Remove(userPurchase);
                 cartListView.ItemsSource = null;
                 cartListView.ItemsSource = cartItems;
+                UpdateTotalAmount();
             }
             else
             {
@@ -188,9 +292,39 @@ namespace SeoulStayMobileS5
             }
         }
 
-        private void proceedBtn_Clicked(object sender, EventArgs e)
+        private async void proceedBtn_Clicked(object sender, EventArgs e)
         {
+            bool confirm = await DisplayAlert("Confirm Checkout", "Do you want to finalize the purchase?", "Yes", "NO");
 
+            if (!confirm)
+                return;
+
+            var userId = await SecureStorage.GetAsync("userId");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                await DisplayAlert("Error", "User not found", "OK");
+                return;
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                var deleteUrl = $"http://10.0.2.2:8044/api/UserPurchases/ClearCart?userId={userId}";
+                var response = await client.DeleteAsync(deleteUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    cartItems.Clear();
+                    cartListView.ItemsSource = null;
+                    cartListView.ItemsSource = cartItems;
+                    totalAmountToPay.Text = "Total amount payable: $0.00";
+
+                    await DisplayAlert("Success", "Checkout completed successfully.", "OK");
+                } else
+                {
+                    await DisplayAlert("Error", "Failed to finalize the purchase", "OK");
+                }
+            }
         }
 
         public class UserPurchase
@@ -205,12 +339,6 @@ namespace SeoulStayMobileS5
             public string Refunded { get; set; }
         }
 
-        public class Coupons
-        {
-            public int Id { get; set; }
-            public string CouponCode { get; set; }
-            public decimal discountPercent { get; set; }
-            public decimal maximimDiscountAmount { get; set; }
-        }
+        
     }
 }

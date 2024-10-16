@@ -7,7 +7,8 @@
             android:TabbedPage.ToolbarPlacement="Bottom"
             Title="Seoul Stay - Services Menu">
 
-    <ContentPage Title="Service"  >
+
+    <ContentPage Title="Service" x:Name="servicesTab"  >
         <StackLayout>
             <Label Text="Welcome John Doe"
                    FontSize="Large"
@@ -20,46 +21,25 @@
                    Margin="20,0,0,0"
                    FontAttributes="Bold"/>
 
-            <Button Text="City tours"
-                    FontSize="Large"
-                    ImageSource="checkmark.png"
-                    HorizontalOptions="FillAndExpand"
-                    x:Name="cityTourBtn"
-                    Clicked="cityTourBtn_Clicked"
-                    BackgroundColor="White"/>
-
-
-            <Button Text="Attraction tickets"
-                    FontSize="Large"
-                    ImageSource="home.png"
-                    HorizontalOptions="FillAndExpand"
-                    x:Name="attractionBtn"
-                    Clicked="attractionBtn_Clicked"
-                    BackgroundColor="White"/>
-
-
-
-            <Button Text="Transfer Services"
-                    FontSize="Large"
-                    ImageSource="airplane.png"
-                    HorizontalOptions="FillAndExpand"
-                    x:Name="transferBtn"
-                    Clicked="transferBtn_Clicked"
-                    BackgroundColor="White"/>
-            <Button Text="Catering Services"
-                    FontSize="Large"
-                    ImageSource="spoonknife.png"
-                    HorizontalOptions="FillAndExpand"
-                    x:Name="cateringBtn"
-                    Clicked="cateringBtn_Clicked"
-                    BackgroundColor="White"/>
-            <Button Text="Safety Box"
-                    FontSize="Large"
-                    ImageSource="eye.png"
-                    HorizontalOptions="FillAndExpand"
-                    x:Name="safetyBtn"
-                    Clicked="safetyBtn_Clicked"
-                    BackgroundColor="White"/>
+            <ListView x:Name="serviceTypesList"
+                      HasUnevenRows="True"
+                      ItemSelected="ServiceType_ItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Orientation="Horizontal" Padding="10">
+                                <Image Source="{Binding IconName}"
+                                       WidthRequest="30"
+                                       HeightRequest="30" />
+                                <Label Text="{Binding Name}"
+                                       FontAttributes="Bold"
+                                       FontSize="Medium"
+                                       HorizontalOptions="StartAndExpand" />
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
         </StackLayout>
     </ContentPage>
@@ -122,7 +102,7 @@
 
             <Label Text=""
                    x:Name="successCoupon"
-                   Margin="30,0,0,0"
+                   Margin="170,0,0,0"
                    FontSize="16"/>
 
 
@@ -143,7 +123,7 @@
     
     
     
-    <ContentPage Title="About" >
+    <ContentPage Title="About" x:Name="aboutTab">
         <StackLayout>
             <Image Source="logoMain.png"
                    HeightRequest="300"

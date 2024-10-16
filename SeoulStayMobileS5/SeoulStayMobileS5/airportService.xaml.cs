@@ -4,22 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace SeoulStayMobileS5
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class cityServicePage : ContentPage
-    {
-        private Service selectedService;
-
-        public cityServicePage()
-        {
+	[XamlCompilation(XamlCompilationOptions.Compile)]
+	public partial class airportService : ContentPage
+	{
+		public airportService ()
+		{
             InitializeComponent();
             LoadServices();
         }
+
+        private Service selectedService;
+
 
         private async void LoadServices()
         {
@@ -31,27 +33,14 @@ namespace SeoulStayMobileS5
                     var response = await client.GetStringAsync(url);
                     var services = JsonConvert.DeserializeObject<List<Service>>(response);
 
-                    var cityTours = services.Where(a => a.serviceTypeid == 1).ToList();
-                    cityService.ItemsSource = cityTours;
+                    var cityTours = services.Where(a => a.serviceTypeid == 3).ToList();
+                    attractionServices.ItemsSource = cityTours;
                 }
                 catch (HttpRequestException ex)
                 {
                     await DisplayAlert("Error", $"Error: {ex.Message}", "Ok");
                 }
             }
-        }
-
-        private void cityService_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {
-            if (e.SelectedItem == null) return;
-
-            selectedService = (Service)e.SelectedItem;
-            titleOfService.Text = $"Description of {selectedService.name}";
-            descriptionOfService.Text = selectedService.description;
-            int numberOfPeople = int.Parse(numOfPeople.Text);
-            int numberOfBooking = (int)Math.Ceiling((double)numberOfPeople / selectedService.bookingCap);
-            totalAmountPay.Text = $"Amount payable: {numberOfBooking * selectedService.price:C}";
-            bookingsLabel.Text = $"{numberOfBooking} bookings required";
         }
 
         private async void addBtn_Clicked(object sender, EventArgs e)
@@ -74,13 +63,13 @@ namespace SeoulStayMobileS5
 
             var purchase = new UserPurchase
             {
-                UserId = long.Parse(userId),  
-                Service = selectedService.name,  
-                TotalPrice = selectedService.price * numberOfPeople,  
+                UserId = long.Parse(userId),
+                Service = selectedService.name,
+                TotalPrice = selectedService.price * numberOfPeople,
                 Date = DateTime.Parse(selectedDate),
-                UserNotes = addNotes.Text,  
-                NumberOfPeople = numberOfPeople,  
-                Refunded = "NO" 
+                UserNotes = addNotes.Text,
+                NumberOfPeople = numberOfPeople,
+                Refunded = "NO"
             };
 
             var json = JsonConvert.SerializeObject(purchase);
@@ -143,6 +132,8 @@ namespace SeoulStayMobileS5
             public int bookingCap { get; set; }
         }
 
+
+
         private void numOfPeople_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (selectedService == null)
@@ -163,6 +154,19 @@ namespace SeoulStayMobileS5
             {
                 DisplayAlert("Error", "Please enter a valid number of people.", "OK");
             }
+        }
+
+        private void attractionServices_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null) return;
+
+            selectedService = (Service)e.SelectedItem;
+            titleOfService.Text = $"Description of {selectedService.name}";
+            descriptionOfService.Text = selectedService.description;
+            int numberOfPeople = int.Parse(numOfPeople.Text);
+            int numberOfBooking = (int)Math.Ceiling((double)numberOfPeople / selectedService.bookingCap);
+            totalAmountPay.Text = $"Amount payable: {numberOfBooking * selectedService.price:C}";
+            bookingsLabel.Text = $"{numberOfBooking} bookings required";
         }
     }
 }
